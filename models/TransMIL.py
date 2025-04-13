@@ -64,18 +64,20 @@ class TransMIL(nn.Module):
         
         #---->pad
         H = h.shape[1]
+        # 它们的值是 H 的平方根向上取整后的整数。
         _H, _W = int(np.ceil(np.sqrt(H))), int(np.ceil(np.sqrt(H)))
         add_length = _H * _W - H
         h = torch.cat([h, h[:,:add_length,:]],dim = 1) #[B, N, 512]
-
+        # print("h.shape",h.shape)
         #---->cls_token
         B = h.shape[0]
         cls_tokens = self.cls_token.expand(B, -1, -1).cuda()
         h = torch.cat((cls_tokens, h), dim=1)
-
+        # print("h.shape",h.shape)
         #---->Translayer x1
+        # 这里的注释错了，应该是N+1
         h = self.layer1(h) #[B, N, 512]
-
+        # print("h.shape",h.shape)
         #---->PPEG
         h = self.pos_layer(h, _H, _W) #[B, N, 512]
         
@@ -83,12 +85,19 @@ class TransMIL(nn.Module):
         h = self.layer2(h) #[B, N, 512]
 
         #---->cls_token
+        # todo:?
+        # print("h.shape",h.shape)
+        # h.shape torch.Size([1, 512]),应该是把第一层的class拿出去了
         h = self.norm(h)[:,0]
-
+        # print("h.shape",h.shape)
         #---->predict
         logits = self._fc2(h) #[B, n_classes]
+        # print("logits.shape",logits.shape)
+        # print(logits)
         Y_hat = torch.argmax(logits, dim=1)
+        # print("Y_hat",Y_hat)
         Y_prob = F.softmax(logits, dim = 1)
+        # print("Y_prob",Y_prob)
         results_dict = {'logits': logits, 'Y_prob': Y_prob, 'Y_hat': Y_hat}
         return results_dict
 

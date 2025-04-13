@@ -54,7 +54,7 @@ class  ModelInterface(pl.LightningModule):
             metrics = torchmetrics.MetricCollection([torchmetrics.Accuracy(num_classes = 2,
                                                                            average = 'micro'),
                                                      torchmetrics.CohenKappa(num_classes = 2),
-                                                     torchmetrics.F1(num_classes = 2,
+                                                     torchmetrics.F1Score(num_classes = 2,
                                                                      average = 'macro'),
                                                      torchmetrics.Recall(average = 'macro',
                                                                          num_classes = 2),
